@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 
 import me.blackvein.quests.Quest;
 import me.blackvein.quests.Quests;
+import me.blackvein.quests.util.MiscUtil;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 
 public class QuestsExpansion extends PlaceholderExpansion {
@@ -105,7 +106,7 @@ public class QuestsExpansion extends PlaceholderExpansion {
      */
     @Override
     public String getVersion() {
-        return "1.0";
+        return "1.1";
     }
   
     /**
@@ -165,10 +166,10 @@ public class QuestsExpansion extends PlaceholderExpansion {
         }
         
         if (identifier.startsWith("player_current_objectives_")) {
-        	String questName = identifier.substring(identifier.lastIndexOf("_") + 1);
+        	Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
         	String list = "";
         	boolean first = true;
-        	for (String s : plugin.getQuester(player.getUniqueId()).getObjectives(plugin.getQuest(questName), false)) {
+        	for (String s : plugin.getQuester(player.getUniqueId()).getCurrentObjectives(quest, false)) {
         		if (!first) {
         			list += "\n";
         		}
@@ -178,42 +179,50 @@ public class QuestsExpansion extends PlaceholderExpansion {
         	return list;
         }
         if (identifier.startsWith("player_has_current_quest_")) {
-        	String questName = identifier.substring(identifier.lastIndexOf("_") + 1);
+            Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
         	for (Entry<Quest, Integer> set : plugin.getQuester(player.getUniqueId()).getCurrentQuests().entrySet()) {
-    			if (set.getKey().getName().equals(questName)) {
+    			if (set.getKey().getName().equals(quest.getName())) {
     				return "true";
     			}
     		}
         	return "false";
         }
         if (identifier.startsWith("player_has_completed_quest_")) {
-        	String questName = identifier.substring(identifier.lastIndexOf("_") + 1);
-            return String.valueOf(plugin.getQuester(player.getUniqueId()).getCompletedQuests().contains(questName));
+            Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
+            return String.valueOf(plugin.getQuester(player.getUniqueId()).getCompletedQuests().contains(quest.getName()));
         }
         if (identifier.startsWith("player_cooldown_time_remaining_")) {
-        	String questName = identifier.substring(identifier.lastIndexOf("_") + 1);
-        	if (plugin.getQuester(player.getUniqueId()).getCompletedQuests().contains(questName)) {
-        		return Quests.getTime(plugin.getQuester(player.getUniqueId()).getCooldownDifference(plugin.getQuest(questName)));
+            Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
+        	if (plugin.getQuester(player.getUniqueId()).getCompletedQuests().contains(quest.getName())) {
+        		return MiscUtil.getTime(plugin.getQuester(player.getUniqueId()).getCooldownDifference(quest));
         	}
         	return "";
         }
         if (identifier.startsWith("player_current_stage_number_")) {
-        	String questName = identifier.substring(identifier.lastIndexOf("_") + 1);
+            Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
         	for (Entry<Quest, Integer> set : plugin.getQuester(player.getUniqueId()).getCurrentQuests().entrySet()) {
-    			if (set.getKey().getName().equals(questName)) {
+    			if (set.getKey().getName().equals(quest.getName())) {
     				return String.valueOf(set.getValue() + 1);
     			}
     		}
         	return "";
         }
         if (identifier.startsWith("player_can_accept_quest_")) {
-        	String questName = identifier.substring(identifier.lastIndexOf("_") + 1);
-            return String.valueOf(plugin.getQuester(player.getUniqueId()).canAcceptOffer(plugin.getQuest(questName), false));
+            Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
+            return String.valueOf(plugin.getQuester(player.getUniqueId()).canAcceptOffer(quest, false));
         }
         if (identifier.startsWith("player_meets_requirements_to_start_")) {
-        	String questName = identifier.substring(identifier.lastIndexOf("_") + 1);
-            return String.valueOf(plugin.getQuest(questName).testRequirements(plugin.getQuester(player.getUniqueId())));
+            Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
+            return String.valueOf(quest.testRequirements(plugin.getQuester(player.getUniqueId())));
         }
         return null;
+    }
+    
+    private Quest matchQuest(String toMatch) {
+        Quest quest = plugin.getQuest(toMatch);
+        if (quest == null) {
+            quest = plugin.getQuestById(toMatch);
+        }
+        return quest;
     }
 }
