@@ -106,7 +106,7 @@ public class QuestsExpansion extends PlaceholderExpansion {
      */
     @Override
     public String getVersion() {
-        return "1.1";
+        return "1.2";
     }
   
     /**
@@ -128,6 +128,38 @@ public class QuestsExpansion extends PlaceholderExpansion {
             return "";
         }
         
+        final String plannerPlaceholder = getPlannerPlaceholder(identifier);
+        if (plannerPlaceholder != null) {
+            return plannerPlaceholder;
+        }
+        
+        final String playerPlaceholder = getPlayerPlaceholder(player, identifier);
+        if (playerPlaceholder != null) {
+            return playerPlaceholder;
+        }
+        
+        return null;
+    }
+    
+    private String getPlannerPlaceholder(String identifier) {
+        Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
+        if (identifier.startsWith("planner_start_time_")) {
+            return MiscUtil.getTime(quest.getPlanner().getStartInMillis());
+        }
+        if (identifier.startsWith("planner_end_time_")) {
+            return MiscUtil.getTime(quest.getPlanner().getEndInMillis());
+        }
+        if (identifier.startsWith("planner_duration_")) {
+            long duration = quest.getPlanner().getEndInMillis() - quest.getPlanner().getStartInMillis();
+            return MiscUtil.getTime(duration);
+        }
+        if (identifier.startsWith("planner_repeat_cycle_")) {
+            return MiscUtil.getTime(quest.getPlanner().getRepeat());
+        }
+        return null;
+    }
+    
+    private String getPlayerPlaceholder(Player player, String identifier) {
         if (identifier.equals("player_quest_points")) {
             return String.valueOf(plugin.getQuester(player.getUniqueId()).getQuestPoints());
         }
@@ -141,51 +173,50 @@ public class QuestsExpansion extends PlaceholderExpansion {
             return String.valueOf(plugin.getQuester(player.getUniqueId()).getCompletedQuests().size());
         }
         if (identifier.equals("player_current_quest_names")) {
-        	String list = "";
-        	boolean first = true;
-        	for (Entry<Quest, Integer> set : plugin.getQuester(player.getUniqueId()).getCurrentQuests().entrySet()) {
-        		if (!first) {
-        			list += "\n";
-        		}
-        		first = false;
-        		list += set.getKey().getName();
-        	}
-        	return list;
+            String list = "";
+            boolean first = true;
+            for (Entry<Quest, Integer> set : plugin.getQuester(player.getUniqueId()).getCurrentQuests().entrySet()) {
+                if (!first) {
+                    list += "\n";
+                }
+                first = false;
+                list += set.getKey().getName();
+            }
+            return list;
         }
         if (identifier.equals("player_completed_quest_names")) {
-        	String list = "";
-        	boolean first = true;
-        	for (String s : plugin.getQuester(player.getUniqueId()).getCompletedQuests()) {
-        		if (!first) {
-        			list += "\n";
-        		}
-        		first = false;
-        		list += s;
-        	}
-        	return list;
+            String list = "";
+            boolean first = true;
+            for (String s : plugin.getQuester(player.getUniqueId()).getCompletedQuests()) {
+                if (!first) {
+                    list += "\n";
+                }
+                first = false;
+                list += s;
+            }
+            return list;
         }
-        
         if (identifier.startsWith("player_current_objectives_")) {
-        	Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
-        	String list = "";
-        	boolean first = true;
-        	for (String s : plugin.getQuester(player.getUniqueId()).getCurrentObjectives(quest, false)) {
-        		if (!first) {
-        			list += "\n";
-        		}
-        		first = false;
-        		list += s;
-        	}
-        	return list;
+            Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
+            String list = "";
+            boolean first = true;
+            for (String s : plugin.getQuester(player.getUniqueId()).getCurrentObjectives(quest, false)) {
+                if (!first) {
+                    list += "\n";
+                }
+                first = false;
+                list += s;
+            }
+            return list;
         }
         if (identifier.startsWith("player_has_current_quest_")) {
             Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
-        	for (Entry<Quest, Integer> set : plugin.getQuester(player.getUniqueId()).getCurrentQuests().entrySet()) {
-    			if (set.getKey().getName().equals(quest.getName())) {
-    				return "true";
-    			}
-    		}
-        	return "false";
+            for (Entry<Quest, Integer> set : plugin.getQuester(player.getUniqueId()).getCurrentQuests().entrySet()) {
+                if (set.getKey().getName().equals(quest.getName())) {
+                    return "true";
+                }
+            }
+            return "false";
         }
         if (identifier.startsWith("player_has_completed_quest_")) {
             Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
@@ -193,19 +224,19 @@ public class QuestsExpansion extends PlaceholderExpansion {
         }
         if (identifier.startsWith("player_cooldown_time_remaining_")) {
             Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
-        	if (plugin.getQuester(player.getUniqueId()).getCompletedQuests().contains(quest.getName())) {
-        		return MiscUtil.getTime(plugin.getQuester(player.getUniqueId()).getCooldownDifference(quest));
-        	}
-        	return "";
+            if (plugin.getQuester(player.getUniqueId()).getCompletedQuests().contains(quest.getName())) {
+                return MiscUtil.getTime(plugin.getQuester(player.getUniqueId()).getCooldownDifference(quest));
+            }
+            return "";
         }
         if (identifier.startsWith("player_current_stage_number_")) {
             Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
-        	for (Entry<Quest, Integer> set : plugin.getQuester(player.getUniqueId()).getCurrentQuests().entrySet()) {
-    			if (set.getKey().getName().equals(quest.getName())) {
-    				return String.valueOf(set.getValue() + 1);
-    			}
-    		}
-        	return "";
+            for (Entry<Quest, Integer> set : plugin.getQuester(player.getUniqueId()).getCurrentQuests().entrySet()) {
+                if (set.getKey().getName().equals(quest.getName())) {
+                    return String.valueOf(set.getValue() + 1);
+                }
+            }
+            return "";
         }
         if (identifier.startsWith("player_can_accept_quest_")) {
             Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
