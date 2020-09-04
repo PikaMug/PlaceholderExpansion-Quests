@@ -198,6 +198,26 @@ public class QuestsExpansion extends PlaceholderExpansion {
             }
             return list;
         }
+        if (identifier.equals("player_compass_quest_name")) {
+            final Quest quest = plugin.getQuester(player.getUniqueId()).getCompassTarget();
+            if (quest != null) {
+                return quest.getName();
+            }
+            return "";
+        }
+        if (identifier.equals("player_compass_quest_objectives")) {
+            final Quest quest = plugin.getQuester(player.getUniqueId()).getCompassTarget();
+            String list = "";
+            boolean first = true;
+            for (final String s : plugin.getQuester(player.getUniqueId()).getCurrentObjectives(quest, false)) {
+                if (!first) {
+                    list += "\n";
+                }
+                first = false;
+                list += s;
+            }
+            return list;
+        }
         if (identifier.startsWith("player_current_objectives_")) {
             final Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
             String list = "";
