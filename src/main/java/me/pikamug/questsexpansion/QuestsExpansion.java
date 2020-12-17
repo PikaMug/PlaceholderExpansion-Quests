@@ -107,7 +107,7 @@ public class QuestsExpansion extends PlaceholderExpansion {
      */
     @Override
     public String getVersion() {
-        return "1.3";
+        return "1.4";
     }
   
     /**
@@ -160,13 +160,12 @@ public class QuestsExpansion extends PlaceholderExpansion {
         return null;
     }
     
-    @SuppressWarnings("deprecation")
     private String getPlayerPlaceholder(final Player player, final String identifier) {
         if (identifier.equals("player_quest_points")) {
             return String.valueOf(plugin.getQuester(player.getUniqueId()).getQuestPoints());
         }
         if (identifier.equals("player_has_journal")) {
-            return String.valueOf(plugin.getQuester(player.getUniqueId()).hasJournal);
+            return String.valueOf(plugin.getQuester(player.getUniqueId()).hasJournal());
         }
         if (identifier.equals("player_current_quest_amount")) {
             return String.valueOf(plugin.getQuester(player.getUniqueId()).getCurrentQuests().size());
@@ -189,12 +188,12 @@ public class QuestsExpansion extends PlaceholderExpansion {
         if (identifier.equals("player_completed_quest_names")) {
             String list = "";
             boolean first = true;
-            for (final String s : plugin.getQuester(player.getUniqueId()).getCompletedQuests()) {
+            for (final Quest quest : plugin.getQuester(player.getUniqueId()).getCompletedQuests()) {
                 if (!first) {
                     list += "\n";
                 }
                 first = false;
-                list += s;
+                list += quest.getName();
             }
             return list;
         }
@@ -242,12 +241,12 @@ public class QuestsExpansion extends PlaceholderExpansion {
         }
         if (identifier.startsWith("player_has_completed_quest_")) {
             final Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
-            return String.valueOf(plugin.getQuester(player.getUniqueId()).getCompletedQuests().contains(quest.getName()));
+            return String.valueOf(plugin.getQuester(player.getUniqueId()).getCompletedQuests().contains(quest));
         }
         if (identifier.startsWith("player_cooldown_time_remaining_")) {
             final Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
-            if (plugin.getQuester(player.getUniqueId()).getCompletedQuests().contains(quest.getName())) {
-                return MiscUtil.getTime(plugin.getQuester(player.getUniqueId()).getCooldownDifference(quest));
+            if (plugin.getQuester(player.getUniqueId()).getCompletedQuests().contains(quest)) {
+                return MiscUtil.getTime(plugin.getQuester(player.getUniqueId()).getRemainingCooldown(quest));
             }
             return "";
         }
