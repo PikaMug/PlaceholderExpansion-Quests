@@ -1,5 +1,5 @@
 
-<img src="https://i.imgur.com/kitJUSU.png" alt="Logo" align="right">
+<img src="https://i.imgur.com/njmfvw4.png" alt="Logo" align="right">
 <div align="center">
   <h1>Easy info across the board</h1>
   <h3>PlaceholderExpansion-Quests is an expansion which provides <a href="https://github.com/PikaMug/Quests">Quests</a> placeholders for the <a href="https://github.com/PlaceholderAPI/PlaceholderAPI">PlaceholderAPI</a> plugin.</h3>
