@@ -1,3 +1,15 @@
+/*
+ * Copyright (c) 2019 PikaMug. All rights reserved.
+ *
+ * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN
+ * NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package me.pikamug.questsexpansion;
 
 import java.util.Map.Entry;
@@ -107,7 +119,7 @@ public class QuestsExpansion extends PlaceholderExpansion {
      */
     @Override
     public String getVersion() {
-        return "1.4";
+        return "1.5";
     }
   
     /**
@@ -117,7 +129,7 @@ public class QuestsExpansion extends PlaceholderExpansion {
      * <br>Since PAPI version 2.9.1 can you use OfflinePlayers in your requests.
      *
      * @param  player
-     *         A {@link org.bukkit.Player Player}.
+     *         A {@link org.bukkit.entity.Player Player}.
      * @param  identifier
      *         A String containing the identifier/value.
      *
@@ -174,30 +186,33 @@ public class QuestsExpansion extends PlaceholderExpansion {
             return String.valueOf(plugin.getQuester(player.getUniqueId()).getCompletedQuests().size());
         }
         if (identifier.equals("player_current_quest_names")) {
-            String list = "";
+            final StringBuilder list = new StringBuilder();
             boolean first = true;
             for (final Entry<Quest, Integer> set : plugin.getQuester(player.getUniqueId()).getCurrentQuests().entrySet()) {
                 if (!first) {
-                    list += "\n";
+                    list.append("\n");
                 }
                 first = false;
-                list += set.getKey().getName();
+                list.append(set.getKey().getName());
             }
-            return list;
+            return list.toString();
         }
         if (identifier.equals("player_completed_quest_names")) {
-            String list = "";
+            final StringBuilder list = new StringBuilder();
             boolean first = true;
             for (final Quest quest : plugin.getQuester(player.getUniqueId()).getCompletedQuests()) {
                 if (!first) {
-                    list += "\n";
+                    list.append("\n");
                 }
                 first = false;
-                list += quest.getName();
+                list.append(quest.getName());
             }
-            return list;
+            return list.toString();
         }
         if (identifier.equals("player_compass_quest_name")) {
+            if (!player.hasPermission("quests.compass")) {
+                return Lang.get("noPermission");
+            }
             final Quest quest = plugin.getQuester(player.getUniqueId()).getCompassTarget();
             if (quest != null) {
                 return quest.getName();
@@ -205,30 +220,36 @@ public class QuestsExpansion extends PlaceholderExpansion {
             return "";
         }
         if (identifier.equals("player_compass_quest_objectives")) {
+            if (!player.hasPermission("quests.compass")) {
+                return Lang.get("noPermission");
+            }
             final Quest quest = plugin.getQuester(player.getUniqueId()).getCompassTarget();
-            String list = "";
+            if (quest == null) {
+                return "";
+            }
+            final StringBuilder list = new StringBuilder();
             boolean first = true;
             for (final String s : plugin.getQuester(player.getUniqueId()).getCurrentObjectives(quest, false)) {
                 if (!first) {
-                    list += "\n";
+                    list.append("\n");
                 }
                 first = false;
-                list += s;
+                list.append(s);
             }
-            return list;
+            return list.toString();
         }
         if (identifier.startsWith("player_current_objectives_")) {
             final Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
-            String list = "";
+            final StringBuilder list = new StringBuilder();
             boolean first = true;
             for (final String s : plugin.getQuester(player.getUniqueId()).getCurrentObjectives(quest, false)) {
                 if (!first) {
-                    list += "\n";
+                    list.append("\n");
                 }
                 first = false;
-                list += s;
+                list.append(s);
             }
-            return list;
+            return list.toString();
         }
         if (identifier.startsWith("player_has_current_quest_")) {
             final Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
