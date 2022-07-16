@@ -119,7 +119,7 @@ public class QuestsExpansion extends PlaceholderExpansion {
      */
     @Override
     public String getVersion() {
-        return "1.5";
+        return "1.6";
     }
   
     /**
@@ -145,13 +145,8 @@ public class QuestsExpansion extends PlaceholderExpansion {
         if (plannerPlaceholder != null) {
             return plannerPlaceholder;
         }
-        
-        final String playerPlaceholder = getPlayerPlaceholder(player, identifier);
-        if (playerPlaceholder != null) {
-            return playerPlaceholder;
-        }
-        
-        return null;
+
+        return getPlayerPlaceholder(player, identifier);
     }
     
     private String getPlannerPlaceholder(final String identifier) {
