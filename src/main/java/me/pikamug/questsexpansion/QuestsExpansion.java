@@ -12,16 +12,18 @@
 
 package me.pikamug.questsexpansion;
 
-import java.util.Map.Entry;
-
+import me.pikamug.quests.BukkitQuestsPlugin;
+import me.pikamug.quests.Quests;
+import me.pikamug.quests.quests.Quest;
+import me.pikamug.quests.quests.components.Objective;
+import me.pikamug.quests.util.BukkitLang;
+import me.pikamug.quests.util.BukkitMiscUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import me.blackvein.quests.Quest;
-import me.blackvein.quests.Quests;
-import me.blackvein.quests.util.Lang;
-import me.blackvein.quests.util.MiscUtil;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+
+import java.util.Map;
 
 public class QuestsExpansion extends PlaceholderExpansion {
 
@@ -119,7 +121,7 @@ public class QuestsExpansion extends PlaceholderExpansion {
      */
     @Override
     public String getVersion() {
-        return "1.6";
+        return "2.0";
     }
   
     /**
@@ -152,17 +154,17 @@ public class QuestsExpansion extends PlaceholderExpansion {
     private String getPlannerPlaceholder(final String identifier) {
         final Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
         if (identifier.startsWith("planner_start_time_")) {
-            return MiscUtil.getTime(quest.getPlanner().getStartInMillis());
+            return BukkitMiscUtil.getTime(quest.getPlanner().getStartInMillis());
         }
         if (identifier.startsWith("planner_end_time_")) {
-            return MiscUtil.getTime(quest.getPlanner().getEndInMillis());
+            return BukkitMiscUtil.getTime(quest.getPlanner().getEndInMillis());
         }
         if (identifier.startsWith("planner_duration_")) {
             final long duration = quest.getPlanner().getEndInMillis() - quest.getPlanner().getStartInMillis();
-            return MiscUtil.getTime(duration);
+            return BukkitMiscUtil.getTime(duration);
         }
         if (identifier.startsWith("planner_repeat_cycle_")) {
-            return MiscUtil.getTime(quest.getPlanner().getRepeat());
+            return BukkitMiscUtil.getTime(quest.getPlanner().getRepeat());
         }
         return null;
     }
@@ -183,7 +185,7 @@ public class QuestsExpansion extends PlaceholderExpansion {
         if (identifier.equals("player_current_quest_names")) {
             final StringBuilder list = new StringBuilder();
             boolean first = true;
-            for (final Entry<Quest, Integer> set : plugin.getQuester(player.getUniqueId()).getCurrentQuests().entrySet()) {
+            for (final Map.Entry<Quest, Integer> set : plugin.getQuester(player.getUniqueId()).getCurrentQuests().entrySet()) {
                 if (!first) {
                     list.append("\n");
                 }
@@ -206,7 +208,7 @@ public class QuestsExpansion extends PlaceholderExpansion {
         }
         if (identifier.equals("player_compass_quest_name")) {
             if (!player.hasPermission("quests.compass")) {
-                return Lang.get("noPermission");
+                return BukkitLang.get("noPermission");
             }
             final Quest quest = plugin.getQuester(player.getUniqueId()).getCompassTarget();
             if (quest != null) {
@@ -216,7 +218,7 @@ public class QuestsExpansion extends PlaceholderExpansion {
         }
         if (identifier.equals("player_compass_quest_objectives")) {
             if (!player.hasPermission("quests.compass")) {
-                return Lang.get("noPermission");
+                return BukkitLang.get("noPermission");
             }
             final Quest quest = plugin.getQuester(player.getUniqueId()).getCompassTarget();
             if (quest == null) {
@@ -224,12 +226,12 @@ public class QuestsExpansion extends PlaceholderExpansion {
             }
             final StringBuilder list = new StringBuilder();
             boolean first = true;
-            for (final String s : plugin.getQuester(player.getUniqueId()).getCurrentObjectives(quest, false)) {
+            for (final Objective obj : plugin.getQuester(player.getUniqueId()).getCurrentObjectives(quest, false, true)) {
                 if (!first) {
                     list.append("\n");
                 }
                 first = false;
-                list.append(s);
+                list.append(obj.getMessage());
             }
             return list.toString();
         }
@@ -237,23 +239,23 @@ public class QuestsExpansion extends PlaceholderExpansion {
             final Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
             final StringBuilder list = new StringBuilder();
             boolean first = true;
-            for (final String s : plugin.getQuester(player.getUniqueId()).getCurrentObjectives(quest, false)) {
+            for (final Objective obj : plugin.getQuester(player.getUniqueId()).getCurrentObjectives(quest, false, true)) {
                 if (!first) {
                     list.append("\n");
                 }
                 first = false;
-                list.append(s);
+                list.append(obj.getMessage());
             }
             return list.toString();
         }
         if (identifier.startsWith("player_has_current_quest_")) {
             final Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
-            for (final Entry<Quest, Integer> set : plugin.getQuester(player.getUniqueId()).getCurrentQuests().entrySet()) {
+            for (final Map.Entry<Quest, Integer> set : plugin.getQuester(player.getUniqueId()).getCurrentQuests().entrySet()) {
                 if (set.getKey().getName().equals(quest.getName())) {
-                    return Lang.get("yesWord");
+                    return BukkitLang.get("yesWord");
                 }
             }
-            return Lang.get("noWord");
+            return BukkitLang.get("noWord");
         }
         if (identifier.startsWith("player_has_completed_quest_")) {
             final Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
@@ -262,13 +264,13 @@ public class QuestsExpansion extends PlaceholderExpansion {
         if (identifier.startsWith("player_cooldown_time_remaining_")) {
             final Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
             if (plugin.getQuester(player.getUniqueId()).getCompletedQuests().contains(quest)) {
-                return MiscUtil.getTime(plugin.getQuester(player.getUniqueId()).getRemainingCooldown(quest));
+                return BukkitMiscUtil.getTime(plugin.getQuester(player.getUniqueId()).getRemainingCooldown(quest));
             }
             return "";
         }
         if (identifier.startsWith("player_current_stage_number_")) {
             final Quest quest = matchQuest(identifier.substring(identifier.lastIndexOf("_") + 1));
-            for (final Entry<Quest, Integer> set : plugin.getQuester(player.getUniqueId()).getCurrentQuests().entrySet()) {
+            for (final Map.Entry<Quest, Integer> set : plugin.getQuester(player.getUniqueId()).getCurrentQuests().entrySet()) {
                 if (set.getKey().getName().equals(quest.getName())) {
                     return String.valueOf(set.getValue() + 1);
                 }
@@ -287,9 +289,10 @@ public class QuestsExpansion extends PlaceholderExpansion {
     }
     
     private Quest matchQuest(final String toMatch) {
-        Quest quest = plugin.getQuest(toMatch);
+        final BukkitQuestsPlugin quests = (BukkitQuestsPlugin) plugin;
+        Quest quest = quests.getQuest(toMatch);
         if (quest == null) {
-            quest = plugin.getQuestById(toMatch);
+            quest = quests.getQuestById(toMatch);
         }
         return quest;
     }
