@@ -121,7 +121,7 @@ public class QuestsExpansion extends PlaceholderExpansion {
      */
     @Override
     public String getVersion() {
-        return "2.0";
+        return "3.0";
     }
   
     /**
